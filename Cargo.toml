@@ -1,0 +1,11 @@
+[package]
+name = "rockwork"
+version = "0.1.0"
+authors = ["Brandon Surmanski <b.surmanski@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+gl = "0.11.0"
+sdl2 = "0.32.1"
+nalgebra = "0.16.0"
+image = "0.21.0"
