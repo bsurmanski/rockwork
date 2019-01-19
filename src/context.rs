@@ -9,9 +9,6 @@ pub struct Context {
 impl Context {
     pub fn new() -> Self {
         let sdl_context = sdl2::init().unwrap();
-        let sdl_video = sdl_context.video().unwrap();
-
-
         Self { sdl: sdl_context, window: None }
     }
 
