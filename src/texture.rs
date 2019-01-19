@@ -13,8 +13,8 @@ pub enum FilteringMode {
 impl FilteringMode {
     pub fn gl_enum(&self) -> GLuint {
         match self {
-            Linear => gl::LINEAR,
-            Nearest => gl::NEAREST
+            FilteringMode::Linear => gl::LINEAR,
+            FilteringMode::Nearest => gl::NEAREST
         }
     }
 }
@@ -28,9 +28,9 @@ pub enum WrapMode {
 impl WrapMode {
     pub fn gl_enum(&self) -> GLuint {
         match self {
-            Clamp => gl::CLAMP_TO_EDGE,
-            Mirrored => gl::MIRRORED_REPEAT,
-            Repeat => gl::REPEAT,
+            WrapMode::Clamp => gl::CLAMP_TO_EDGE,
+            WrapMode::Mirrored => gl::MIRRORED_REPEAT,
+            WrapMode::Repeat => gl::REPEAT,
         }
     }
 }

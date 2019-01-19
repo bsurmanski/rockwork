@@ -7,7 +7,7 @@ use std::error;
 use std::ffi::CString;
 use gl::types::*;
 
-struct GLContext {
+pub struct GLContext {
 }
 
 impl GLContext {

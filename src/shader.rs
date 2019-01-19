@@ -7,6 +7,7 @@ use std::error;
 use std::ffi::CString;
 use gl::types::*;
 
+#[derive(Copy, Clone)]
 pub enum ShaderStage {
     Vertex,
     Geometry,
@@ -16,9 +17,9 @@ pub enum ShaderStage {
 impl ShaderStage {
     pub fn gl_enum(&self) -> GLuint {
         match self {
-            Vertex => gl::VERTEX_SHADER,
-            Geometry => gl::GEOMETRY_SHADER,
-            Fragment => gl::FRAGMENT_SHADER,
+            ShaderStage::Vertex => gl::VERTEX_SHADER,
+            ShaderStage::Geometry => gl::GEOMETRY_SHADER,
+            ShaderStage::Fragment => gl::FRAGMENT_SHADER,
         }
     }
 }
