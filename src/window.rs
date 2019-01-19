@@ -19,8 +19,7 @@ impl Window {
         let sdl_window = sdl_video.window(&title,
                                           w as u32,
                                           h as u32)
-            .opengl()
-            .build()
+            .build_glium()
             .unwrap();
 
         let gl_context = sdl_window.gl_create_context().unwrap();
