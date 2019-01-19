@@ -8,6 +8,7 @@ use std::ffi::CString;
 use gl::types::*;
 
 use crate::shader::*;
+use crate::framebuffer::*;
 
 pub struct Program {
     pub id: GLuint,
@@ -85,5 +86,8 @@ impl Program {
             }
             Ok(())
         }
+    }
+
+    pub fn draw(&mut self, fb: Framebuffer) {
     }
 }
