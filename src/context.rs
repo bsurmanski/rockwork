@@ -33,8 +33,7 @@ impl Context {
 
     pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context)) {
         #[cfg(target_os = "emscripten")] {
-            let callback = || { tick_fn(self); };
-            emscripten::set_main_loop_callback(callback, 60, true);
+            emscripten::set_main_loop_callback(move || { tick_fn(self); }, 60, true);
         }
 
         #[cfg(not(target_os = "emscripten"))]
