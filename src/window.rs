@@ -12,10 +12,6 @@ impl Window {
     pub fn new(ctx: &Context, title: String, w: usize, h: usize) -> Self {
         let sdl_video = ctx.sdl_context().video().unwrap();
 
-        let gl_attr = sdl_video.gl_attr();
-        gl_attr.set_context_profile(GLProfile::Core);
-        gl_attr.set_context_version(3, 3);
-
         let sdl_window = sdl_video.window(&title,
                                           w as u32,
                                           h as u32)
@@ -24,9 +20,12 @@ impl Window {
             .unwrap();
 
         let gl_context = sdl_window.gl_create_context().unwrap();
+
+        #[cfg(target_os = "emscripten")]
+        gl::load_with(|name| emscripten::get_proc_address(name) as *const _);
+
+        #[cfg(not(target_os = "emscripten"))]
         gl::load_with(|name| sdl_video.gl_get_proc_address(name) as *const _);
-        debug_assert_eq!(gl_attr.context_profile(), GLProfile::Core);
-        debug_assert_eq!(gl_attr.context_version(), (3, 3));
 
         Window { 
             sdl_window: sdl_window,
