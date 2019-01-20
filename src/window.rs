@@ -20,15 +20,18 @@ impl Window {
         let gl_context = sdl_window.gl_create_context().unwrap();
 
         #[cfg(target_os = "emscripten")]
-        gl::load_with(|name| emscripten::get_proc_address(name) as *const _);
+        let _gl = gl::load_with(|name| emscripten::get_proc_address(name) as *const _);
 
         #[cfg(not(target_os = "emscripten"))]
-        gl::load_with(|name| ctx.sdl_video.gl_get_proc_address(name) as *const _);
+        let _gl = gl::load_with(|name| ctx.sdl_video.gl_get_proc_address(name) as *const _);
 
-        Window { 
+        let ret = Window { 
             gl_context: gl_context,
             sdl_window: sdl_window,
-        }
+        };
+
+        ret.clear();
+        return ret;
     }
 
     pub fn clear(&self) {

@@ -57,7 +57,7 @@ impl Context {
 
             // should be roughly 60 fps
             std::thread::sleep(std::time::Duration::new(0, 1_000_000_000u32 / 60)
-                               - start.elapsed());
+                               );//- start.elapsed());
         }
     }
 
