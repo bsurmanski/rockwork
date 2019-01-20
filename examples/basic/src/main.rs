@@ -7,7 +7,8 @@ fn main() {
     ctx.open_window("Hello".to_string(), 320, 240);
 
     let mut event_pump = ctx.sdl_context().event_pump().unwrap();
-    'running: loop {
+
+    let tick = || {
         ctx.window().clear();
         ctx.swap_buffers();
         for event in event_pump.poll_iter() {
@@ -18,6 +19,7 @@ fn main() {
                 _ => {}
             }
         }
-        ::std::thread::sleep(::std::time::Duration::new(0, 1_000_000_000u32 / 60));
-    }
+    };
+
+    ctx.run(tick);
 }

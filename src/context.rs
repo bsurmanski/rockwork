@@ -31,7 +31,7 @@ impl Context {
         self.window.as_ref().unwrap().swap_buffers();
     }
 
-    pub fn run(&mut self, tick_fn: fn(ctx: &mut Context)) {
+    pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context)) {
         #[cfg(target_os = "emscripten")] {
             let callback = || { tick_fn(self); };
             emscripten::set_main_loop_callback(callback, 60, true);
