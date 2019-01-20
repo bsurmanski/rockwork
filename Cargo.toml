@@ -1,6 +1,6 @@
 [package]
 name = "rockwork"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Brandon Surmanski <b.surmanski@gmail.com>"]
 edition = "2018"
 
