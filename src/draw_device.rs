@@ -11,7 +11,7 @@ pub struct GLContext {
 }
 
 impl GLContext {
-    fn new(w: usize, h: usize) {
+    fn new(_w: usize, _h: usize) {
     }
 
     fn clear(&mut self) {

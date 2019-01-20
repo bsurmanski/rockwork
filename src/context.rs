@@ -48,7 +48,7 @@ impl Context {
 
         #[cfg(not(target_os = "emscripten"))]
         'run: loop {
-            let start = time::Instant::now();
+            let _start = time::Instant::now();
             tick_fn(self);
 
             if !self.running {

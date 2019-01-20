@@ -62,7 +62,7 @@ impl Texture {
         unsafe {
             let rgba = img.to_rgba();
             let mut texture = Self::new(rgba.width() as usize, rgba.height() as usize);
-            let mut buf = img.to_rgba().into_raw();
+            let buf = img.to_rgba().into_raw();
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
                            0,

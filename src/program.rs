@@ -88,6 +88,6 @@ impl Program {
         }
     }
 
-    pub fn draw(&mut self, fb: Framebuffer) {
+    pub fn draw(&mut self, _fb: Framebuffer) {
     }
 }
