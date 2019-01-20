@@ -1,8 +1,5 @@
 use crate::context::Context;
 
-use sdl2::video::GLProfile;
-
-
 pub struct Window {
     gl_context: sdl2::video::GLContext,
     sdl_window: sdl2::video::Window,

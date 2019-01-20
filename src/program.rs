@@ -1,10 +1,7 @@
 extern crate gl;
 
-use std::fmt;
 use std::io::Read;
 use std::io::Error;
-use std::error;
-use std::ffi::CString;
 use gl::types::*;
 
 use crate::shader::*;
@@ -71,7 +68,7 @@ impl Program {
         return Ok(());
     }
 
-    fn build(&mut self) -> Result<(), Error> {
+    pub fn build(&mut self) -> Result<(), Error> {
         let mut shaders = [&mut self.vertex_shader, &mut self.geometry_shader, &mut self.fragment_shader];
         unsafe {
             for s in shaders.iter_mut() {

@@ -2,9 +2,8 @@ use gl::types::*;
 use std::ffi::c_void;
 use std::io::Read;
 
-use serde_derive::{Serialize, Deserialize};
-
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Debug)]
+#[repr(C)]
 pub struct Vertex {
     position: [f32; 3],
     normal: [i16; 3],
@@ -16,13 +15,13 @@ pub struct Vertex {
     incident_edge_id: u16,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Debug)]
+#[repr(C)]
 pub struct Face {
     vertex_ids: [u16; 3],
-    incident_edge_id: u16,
 }
 
-#[derive(Serialize, Deserialize)]
+#[repr(C)]
 pub struct Edge {
     vertex_ids: [u16; 2],
     face_ids: [u16; 2],
@@ -30,7 +29,8 @@ pub struct Edge {
     second_edges: [u16; 2],
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Default, Debug)]
+#[repr(C)]
 pub struct MdlHeader {
     magic: [u8; 3],
     version: u8,
@@ -56,8 +56,28 @@ impl Drop for Mesh {
     }
 }
 
+fn read_into<T>(f: &mut Read, s: &mut T) -> std::io::Result<()> {
+    unsafe {
+        let mut slice = std::slice::from_raw_parts_mut(
+            (s as *mut T) as *mut u8,
+            std::mem::size_of::<T>());
+        f.read_exact(slice)?;
+        Ok(())
+    }
+}
+
+fn read_into_slice<T>(f: &mut Read, s: &mut [T]) -> std::io::Result<()> where T: std::fmt::Debug{
+    unsafe {
+        let mut slice = std::slice::from_raw_parts_mut(
+            (s.as_ptr() as *mut T) as *mut u8,
+            std::mem::size_of::<T>() * s.len());
+        f.read_exact(slice)?;
+        Ok(())
+    }
+}
+
 impl Mesh {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut vbo: GLuint = 0;
         let mut ibo: GLuint = 0;
         unsafe {
@@ -72,18 +92,22 @@ impl Mesh {
         }
     }
 
-    fn from_mdl(f: &mut Read) -> Result<Self, String> {
-        let header: MdlHeader = bincode::deserialize_from(
-            f.take(std::mem::size_of::<MdlHeader>() as u64)).unwrap();
+    pub fn from_mdl(f: &mut Read) -> Result<Self, String> {
+        let mut header: MdlHeader = Default::default();
+        read_into(f, &mut header).unwrap();
 
-        if String::from_utf8_lossy(&header.magic[0..2]) != "MDL" {
-            return Err("Bad header in .mdl file".to_string());
+        if String::from_utf8_lossy(&header.magic[0..3]) != "MDL" {
+            return Err(format!("Bad header in .mdl file: {:?}", String::from_utf8_lossy(&header.magic[0..2])));
         }
 
-        let verts: Vec<Vertex> = bincode::deserialize_from(
-            f.take(std::mem::size_of::<Vertex> as u64 * header.nverts as u64)).unwrap(); 
-        let faces: Vec<Face> = bincode::deserialize_from(
-            f.take(std::mem::size_of::<Face> as u64 * header.nfaces as u64)).unwrap(); 
+        let mut verts: Vec<Vertex> = Vec::with_capacity(header.nverts as usize);
+        let mut faces: Vec<Face> = Vec::with_capacity(header.nfaces as usize);
+        unsafe {
+            verts.set_len(header.nverts as usize);
+            faces.set_len(header.nfaces as usize);
+            read_into_slice(f, verts.as_mut_slice()).unwrap();
+            read_into_slice(f, faces.as_mut_slice()).unwrap();
+        }
 
         let mut mesh = Self::new();
         mesh.upload_vertex_data(verts);
@@ -91,7 +115,7 @@ impl Mesh {
         Ok(mesh)
     }
 
-    fn upload_vertex_data(&mut self, verts: Vec<Vertex>) {
+    pub fn upload_vertex_data(&mut self, verts: Vec<Vertex>) {
         unsafe {
             gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
             gl::BufferData(gl::ARRAY_BUFFER, 
@@ -101,7 +125,7 @@ impl Mesh {
         }
     }
 
-    fn upload_face_data(&mut self, faces: Vec<Face>) {
+    pub fn upload_face_data(&mut self, faces: Vec<Face>) {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
             gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, 
@@ -112,14 +136,14 @@ impl Mesh {
         }
     }
 
-    fn bind(&self) {
+    pub fn bind(&self) {
         unsafe {
             gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
         }
     }
 
-    fn draw(&self) {
+    pub fn draw(&self) {
         unsafe {
             gl::DrawElements(gl::TRIANGLES, self.nelems as i32, 
                              gl::UNSIGNED_SHORT, std::ptr::null());
