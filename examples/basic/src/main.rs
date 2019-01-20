@@ -9,7 +9,7 @@ fn tick(ctx: &mut Context) {
     for event in ctx.sdl_event_pump.poll_iter() {
         match event {
             Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                //std::process::exit(0);
+                std::process::exit(0);
             },
             _ => {}
         }
@@ -20,11 +20,6 @@ fn main() {
     let mut ctx = Context::new();
     ctx.open_window("Hello".to_string(), 320, 240);
     
-    /*
-    let tick = |ctx| {
-    };
-    */
-
     ctx.run(&mut tick);
     //emscripten::set_main_loop_callback(tick, 60, true);
 }

@@ -2,7 +2,7 @@ extern crate gl;
 extern crate image;
 
 use gl::types::*;
-use image::{GenericImage, Pixel};
+use image::Pixel;
 use std::ffi::*;
 
 pub enum FilteringMode {

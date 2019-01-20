@@ -5,10 +5,23 @@ authors = ["Brandon Surmanski <b.surmanski@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+# Rendering
 gl = "0.11.0"
+
+# Windowing
 sdl2 = "0.32.1"
+
+# Matrix / Vector Math
 nalgebra = "0.16.0"
+
+# Loading Images
 image = "0.21.0"
 
+# For loading binary files
+bincode = "1.0.1"
+serde = "1.0.85"
+serde_derive = "1.0.85"
+
+# For compiling to Emscripten webasm.
 [target.'cfg(target_os = "emscripten")'.dependencies]
 emscripten = { git = "https://github.com/bsurmanski/emscripten-rs" }

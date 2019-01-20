@@ -5,6 +5,7 @@ pub mod program;
 pub mod shader;
 pub mod texture;
 pub mod framebuffer;
+pub mod mesh;
 
 #[cfg(test)]
 mod tests {
