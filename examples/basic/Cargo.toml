@@ -5,7 +5,7 @@ authors = ["Brandon Surmanski <b.surmanski@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rockwork = { git = "https://github.com/bsurmanski/rockwork", branch = "rawgl" }
+rockwork = { path = "../../" }
 sdl2 = "0.32.1"
 gl = "0.11.0"
 
