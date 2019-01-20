@@ -4,6 +4,8 @@ use std::time;
 
 pub struct Context {
     sdl: Sdl,
+    pub sdl_video: sdl2::VideoSubsystem,
+    pub sdl_event_pump: sdl2::EventPump,
     window: Option<Window>,
     running: bool,
 }
@@ -11,7 +13,15 @@ pub struct Context {
 impl Context {
     pub fn new() -> Self {
         let sdl_context = sdl2::init().unwrap();
-        Self { sdl: sdl_context, window: None, running: true }
+        let sdl_video = sdl_context.video().unwrap();
+        let sdl_event_pump = sdl_context.event_pump().unwrap();
+        Self {
+            sdl: sdl_context, 
+            sdl_video: sdl_video,
+            sdl_event_pump: sdl_event_pump,
+            window: None,
+            running: true 
+        }
     }
 
     pub fn open_window(&mut self, title: String, w: usize, h: usize) -> &Window {
