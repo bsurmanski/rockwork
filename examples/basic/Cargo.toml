@@ -8,3 +8,6 @@ edition = "2018"
 rockwork = { git = "https://github.com/bsurmanski/rockwork", branch = "rawgl" }
 sdl2 = "0.32.1"
 gl = "0.11.0"
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+emscripten = { git = "https://github.com/bsurmanski/emscripten-rs" }

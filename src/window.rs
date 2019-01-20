@@ -4,8 +4,10 @@ use sdl2::video::GLProfile;
 
 
 pub struct Window {
-    sdl_window: sdl2::video::Window,
     gl_context: sdl2::video::GLContext,
+    sdl_window: sdl2::video::Window,
+    sdl_video: sdl2::VideoSubsystem,
+    sdl_event_pump: sdl2::EventPump,
 }
 
 impl Window {
@@ -28,8 +30,10 @@ impl Window {
         gl::load_with(|name| sdl_video.gl_get_proc_address(name) as *const _);
 
         Window { 
+            gl_context: gl_context,
             sdl_window: sdl_window,
-            gl_context: gl_context
+            sdl_video: sdl_video,
+            sdl_event_pump: ctx.sdl_context().event_pump().unwrap(),
         }
     }
 
