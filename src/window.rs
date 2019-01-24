@@ -1,12 +1,26 @@
 use crate::context::Context;
 
+use std::ffi::CStr;
+use sdl2::video::GLProfile;
+
 pub struct Window {
     gl_context: sdl2::video::GLContext,
     sdl_window: sdl2::video::Window,
 }
 
 impl Window {
-    pub fn new(ctx: &Context, title: String, w: usize, h: usize) -> Self {
+    pub fn new<T>(ctx: &Context<T>, title: String, w: usize, h: usize) -> Self {
+        let gl_attr = ctx.sdl_video.gl_attr();
+        #[cfg(not(target_os = "emscripten"))] {
+            gl_attr.set_context_profile(GLProfile::Core);
+            gl_attr.set_context_version(3, 2);
+        }
+
+        #[cfg(target_os = "emscripten")] {
+            gl_attr.set_context_profile(GLProfile::GLES);
+            gl_attr.set_context_version(3, 0);
+        }
+
         let sdl_window = ctx.sdl_video.window(&title,
                                               w as u32,
                                               h as u32)
@@ -22,13 +36,13 @@ impl Window {
         #[cfg(not(target_os = "emscripten"))]
         let _gl = gl::load_with(|name| ctx.sdl_video.gl_get_proc_address(name) as *const _);
 
-        let ret = Window { 
+        dbg!(unsafe { CStr::from_ptr(gl::GetString(gl::VERSION) as *const i8) } );
+        dbg!(unsafe { CStr::from_ptr(gl::GetString(gl::SHADING_LANGUAGE_VERSION) as *const i8) } );
+
+        Window { 
             gl_context: gl_context,
             sdl_window: sdl_window,
-        };
-
-        ret.clear();
-        return ret;
+        }
     }
 
     pub fn clear(&self) {

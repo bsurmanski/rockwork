@@ -44,12 +44,14 @@ pub struct MdlHeader {
 pub struct Mesh {
     ibo: GLuint,
     vbo: GLuint,
-    nelems: usize,
+    vao: GLuint,
+    pub nelems: usize,
 }
 
 impl Drop for Mesh {
     fn drop(&mut self) {
         unsafe {
+            dbg!("drop mesh");
             gl::DeleteBuffers(1, &self.vbo);
             gl::DeleteBuffers(1, &self.ibo);
         }
@@ -80,14 +82,17 @@ impl Mesh {
     pub fn new() -> Self {
         let mut vbo: GLuint = 0;
         let mut ibo: GLuint = 0;
+        let mut vao: GLuint = 0;
         unsafe {
             gl::GenBuffers(1, &mut vbo);
             gl::GenBuffers(1, &mut ibo);
+            gl::GenVertexArrays(1, &mut vao);
         }
 
         Mesh {
             vbo: vbo,
             ibo: ibo,
+            vao: vao,
             nelems: 0,
         }
     }
@@ -117,28 +122,55 @@ impl Mesh {
 
     pub fn upload_vertex_data(&mut self, verts: Vec<Vertex>) {
         unsafe {
+            gl::BindVertexArray(self.vao);
+
             gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
             gl::BufferData(gl::ARRAY_BUFFER, 
-                           (std::mem::size_of::<Vertex>() * verts.len()) as isize,
-                           verts.as_ptr() as *const c_void,
+                           (std::mem::size_of::<Vertex>() * verts.len()) as GLsizeiptr,
+                           verts.as_ptr() as *const GLvoid,
                            gl::STATIC_DRAW);
+            dbg!(std::mem::size_of::<Vertex>());
+            dbg!(verts.len());
+
+            // pos
+            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 32, std::ptr::null());
+            gl::EnableVertexAttribArray(0);
+            // norm
+            gl::VertexAttribPointer(1, 3, gl::SHORT, gl::TRUE, 32, 12 as *const _);
+            gl::EnableVertexAttribArray(1);
+            // uv
+            gl::VertexAttribPointer(2, 2, gl::UNSIGNED_SHORT, gl::TRUE, 32, 18 as *const _);
+            gl::EnableVertexAttribArray(2);
+            // color
+            gl::VertexAttribPointer(3, 3, gl::UNSIGNED_BYTE, gl::TRUE, 32, 22 as *const _);
+            gl::EnableVertexAttribArray(3);
+
+            gl::BindVertexArray(0);
+            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
         }
     }
 
     pub fn upload_face_data(&mut self, faces: Vec<Face>) {
         unsafe {
+            dbg!(&faces);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
             gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, 
-                           (std::mem::size_of::<Face>() * faces.len()) as isize,
-                           faces.as_ptr() as *const c_void,
+                           (std::mem::size_of::<Face>() * faces.len()) as GLsizeiptr,
+                           faces.as_ptr() as *const GLvoid,
                            gl::STATIC_DRAW);
+            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
             self.nelems = faces.len() * 3;
+            dbg!(std::mem::size_of::<Face>());
+            dbg!(faces.len());
+            dbg!(self.nelems);
         }
     }
 
     pub fn bind(&self) {
         unsafe {
-            gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            //gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
+            gl::BindVertexArray(self.vao);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
         }
     }
