@@ -129,8 +129,6 @@ impl Mesh {
                            (std::mem::size_of::<Vertex>() * verts.len()) as GLsizeiptr,
                            verts.as_ptr() as *const GLvoid,
                            gl::STATIC_DRAW);
-            dbg!(std::mem::size_of::<Vertex>());
-            dbg!(verts.len());
 
             // pos
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 32, std::ptr::null());
@@ -153,7 +151,6 @@ impl Mesh {
 
     pub fn upload_face_data(&mut self, faces: Vec<Face>) {
         unsafe {
-            dbg!(&faces);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
             gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, 
                            (std::mem::size_of::<Face>() * faces.len()) as GLsizeiptr,
@@ -161,9 +158,6 @@ impl Mesh {
                            gl::STATIC_DRAW);
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
             self.nelems = faces.len() * 3;
-            dbg!(std::mem::size_of::<Face>());
-            dbg!(faces.len());
-            dbg!(self.nelems);
         }
     }
 

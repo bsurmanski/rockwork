@@ -43,7 +43,6 @@ impl Shader {
             let mut src_str = String::new();
             src.read_to_string(&mut src_str)?;
             let id = gl::CreateShader(stage.gl_enum());
-            dbg!(id);
 
             Ok(Shader {
                 id: id,
@@ -87,7 +86,6 @@ impl Shader {
             let srcs = [define.as_ptr(), shader_source.as_ptr()];
             gl::ShaderSource(self.id, 2, srcs.as_ptr(), std::ptr::null());
             gl::CompileShader(self.id);
-            dbg!(self.id);
             if let Err(e) = self.get_compiler_error() {
                 panic!(e); //TODO: handle error
             }

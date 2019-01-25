@@ -24,6 +24,12 @@ pub enum WrapMode {
     Repeat,
 }
 
+pub enum TextureFormat {
+    RGBA,
+    DEPTH,
+    DEPTH_STENCIL,
+}
+
 impl WrapMode {
     pub fn gl_enum(&self) -> GLuint {
         match self {
@@ -53,7 +59,10 @@ impl Texture {
         unsafe {
             let mut id: GLuint = 0;
             gl::GenTextures(1, &mut id);
-            Self { id: id, width: w, height: h }
+            let mut ret = Self { id: id, width: w, height: h };
+            ret.set_filtering_mode(FilteringMode::Nearest);
+            ret.set_wrap_mode(WrapMode::Repeat);
+            return ret;
         }
     }
 
@@ -72,8 +81,6 @@ impl Texture {
                            gl::RGBA,
                            gl::UNSIGNED_BYTE,
                            rgba.into_raw().as_ptr() as *const c_void);
-            texture.set_filtering_mode(FilteringMode::Nearest);
-            texture.set_wrap_mode(WrapMode::Repeat);
             return texture;
         }
     }
@@ -84,15 +91,13 @@ impl Texture {
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
                            0,
-                           gl::RGBA as i32,
+                           gl::RGBA8 as i32,
                            w as i32,
                            h as i32,
                            0,
                            gl::RGBA,
                            gl::UNSIGNED_BYTE,
                            std::ptr::null());
-            texture.set_filtering_mode(FilteringMode::Nearest);
-            texture.set_wrap_mode(WrapMode::Repeat);
             return texture;
         }
     }
@@ -150,6 +155,7 @@ impl Texture {
     pub fn bind(&self, index: usize) {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + index as GLuint);
+            gl::Enable(gl::TEXTURE_2D);
             gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
     }

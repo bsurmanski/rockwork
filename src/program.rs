@@ -111,24 +111,15 @@ impl Program {
         }
     }
 
-    pub fn bind_texture(&mut self, tex: &Texture, name: String) {
+    pub fn bind_texture(&mut self, tex: &Texture, unit: i32, name: String) {
         unsafe {
             let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
-            gl::Uniform1i(loc, 0);
-            tex.bind(0);
+            gl::Uniform1i(loc, unit);
+            tex.bind(unit as usize);
         }
     }
 
     pub fn draw(&mut self, mesh: &Mesh) {
-        unsafe {
-            gl::Disable(gl::DEPTH_TEST);
-            gl::Disable(gl::BLEND);
-            gl::Disable(gl::SCISSOR_TEST);
-            gl::FrontFace(gl::CW);
-            gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
-            gl::Enable(gl::TEXTURE_2D);
-            gl::Viewport(0, 0, 320, 240);
-        }
         self.bind();
         mesh.bind();
         mesh.draw();

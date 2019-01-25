@@ -39,6 +39,14 @@ impl Window {
         dbg!(unsafe { CStr::from_ptr(gl::GetString(gl::VERSION) as *const i8) } );
         dbg!(unsafe { CStr::from_ptr(gl::GetString(gl::SHADING_LANGUAGE_VERSION) as *const i8) } );
 
+        unsafe {
+            gl::Disable(gl::DEPTH_TEST);
+            gl::Disable(gl::BLEND);
+            gl::Disable(gl::SCISSOR_TEST);
+            gl::FrontFace(gl::CW);
+            gl::Viewport(0, 0, w as i32, h as i32);
+        }
+
         Window { 
             gl_context: gl_context,
             sdl_window: sdl_window,
@@ -47,7 +55,7 @@ impl Window {
 
     pub fn clear(&self) {
         unsafe {
-            gl::ClearColor(0.6, 0.0, 0.8, 1.0);
+            gl::ClearColor(0.39, 0.58, 0.92, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
