@@ -17,10 +17,10 @@ pub struct GameData {
 
 static mut GAME_DATA: Option<GameData> = None;
 
-fn tick(ctx: &mut Context, dt: Duration) {
+fn tick(ctx: &mut Context, _dt: Duration) {
     ctx.window().clear();
 
-    let mut gd = unsafe { GAME_DATA.as_mut().unwrap() };
+    let gd = unsafe { GAME_DATA.as_mut().unwrap() };
     gd.program.bind_texture(&gd.tex, "tex".to_string());
     gd.program.draw(&gd.quad);
 
