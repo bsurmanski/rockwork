@@ -60,7 +60,7 @@ impl Drop for Mesh {
 
 fn read_into<T>(f: &mut Read, s: &mut T) -> std::io::Result<()> {
     unsafe {
-        let mut slice = std::slice::from_raw_parts_mut(
+        let slice = std::slice::from_raw_parts_mut(
             (s as *mut T) as *mut u8,
             std::mem::size_of::<T>());
         f.read_exact(slice)?;
@@ -70,7 +70,7 @@ fn read_into<T>(f: &mut Read, s: &mut T) -> std::io::Result<()> {
 
 fn read_into_slice<T>(f: &mut Read, s: &mut [T]) -> std::io::Result<()> where T: std::fmt::Debug{
     unsafe {
-        let mut slice = std::slice::from_raw_parts_mut(
+        let slice = std::slice::from_raw_parts_mut(
             (s.as_ptr() as *mut T) as *mut u8,
             std::mem::size_of::<T>() * s.len());
         f.read_exact(slice)?;
