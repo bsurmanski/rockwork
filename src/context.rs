@@ -2,16 +2,15 @@ use sdl2::Sdl;
 use crate::window::Window;
 use std::time;
 
-pub struct Context<T> {
+pub struct Context {
     sdl: Sdl,
     pub sdl_video: sdl2::VideoSubsystem,
     pub sdl_event_pump: sdl2::EventPump,
     window: Option<Window>,
     running: bool,
-    game_data: Option<T>,
 }
 
-impl<T> Context<T> {
+impl Context {
     pub fn new() -> Self {
         let sdl_context = sdl2::init().unwrap();
         let sdl_video = sdl_context.video().unwrap();
@@ -22,20 +21,7 @@ impl<T> Context<T> {
             sdl_event_pump: sdl_event_pump,
             window: None,
             running: true,
-            game_data: None,
         }
-    }
-
-    pub fn set_game_data(&mut self, data: T) {
-        self.game_data = Some(data);
-    }
-
-    pub fn game_data(&self) -> &T {
-        self.game_data.as_ref().unwrap()
-    }
-
-    pub fn game_data_mut(&mut self) -> &mut T {
-        self.game_data.as_mut().unwrap()
     }
 
     pub fn open_window(&mut self, title: String, w: usize, h: usize) -> &Window {
@@ -56,7 +42,7 @@ impl<T> Context<T> {
         self.window.as_ref().unwrap().swap_buffers();
     }
 
-    pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context<T>, time::Duration)) {
+    pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context, time::Duration)) {
         let mut time = time::Instant::now();
         #[cfg(target_os = "emscripten")] {
             emscripten::set_main_loop_callback(|| { 

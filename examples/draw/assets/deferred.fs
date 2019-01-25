@@ -1,8 +1,11 @@
-in vec2 uv_pos;
+uniform sampler2D tex;
 
+in vec2 fuv;
 out vec4 color;
 
 void main()
 {
-    color = vec4(uv_pos, 1.0, 1.0);
+    vec4 c = texture(tex, fuv); 
+    if(c.a < 0.1) discard;
+    color = c;
 }

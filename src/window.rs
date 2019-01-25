@@ -9,7 +9,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new<T>(ctx: &Context<T>, title: String, w: usize, h: usize) -> Self {
+    pub fn new(ctx: &Context, title: String, w: usize, h: usize) -> Self {
         let gl_attr = ctx.sdl_video.gl_attr();
         #[cfg(not(target_os = "emscripten"))] {
             gl_attr.set_context_profile(GLProfile::Core);

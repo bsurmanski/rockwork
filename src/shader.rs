@@ -31,8 +31,8 @@ pub struct Shader {
 impl Drop for Shader {
     fn drop(&mut self) {
         unsafe {
+            dbg!("drop shader");
             gl::DeleteShader(self.id);
-            dbg!("DROP");
         }
     }
 }

@@ -1,8 +1,9 @@
 use rockwork::context::Context;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use std::time::Duration;
 
-fn tick(ctx: &mut Context) {
+fn tick(ctx: &mut Context, _dt: Duration) {
     ctx.window().clear();
     ctx.swap_buffers();
 
@@ -21,5 +22,4 @@ fn main() {
     ctx.open_window("Hello".to_string(), 320, 240);
     
     ctx.run(&mut tick);
-    //emscripten::set_main_loop_callback(tick, 60, true);
 }

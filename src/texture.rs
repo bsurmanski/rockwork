@@ -59,9 +59,9 @@ impl Texture {
 
     pub fn new_rgba_from_image(img: &mut image::DynamicImage) -> Self {
         unsafe {
-            let rgba = img.to_rgba();
+            // flipping vertical because GL is indexed from the bottom.
+            let rgba = image::imageops::flip_vertical(&img.to_rgba());
             let mut texture = Self::new(rgba.width() as usize, rgba.height() as usize);
-            let buf = img.to_rgba().into_raw();
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
                            0,
@@ -71,7 +71,7 @@ impl Texture {
                            0,
                            gl::RGBA,
                            gl::UNSIGNED_BYTE,
-                           buf.as_ptr() as *const c_void);
+                           rgba.into_raw().as_ptr() as *const c_void);
             texture.set_filtering_mode(FilteringMode::Nearest);
             texture.set_wrap_mode(WrapMode::Repeat);
             return texture;
@@ -144,6 +144,13 @@ impl Texture {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, mode.gl_enum() as GLint);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, mode.gl_enum() as GLint);
+        }
+    }
+
+    pub fn bind(&self, index: usize) {
+        unsafe {
+            gl::ActiveTexture(gl::TEXTURE0 + index as GLuint);
+            gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
     }
 }
