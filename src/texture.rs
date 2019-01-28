@@ -42,8 +42,8 @@ impl WrapMode {
 
 pub struct Texture {
     pub id: GLuint,
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
 }
 
 impl Drop for Texture {
@@ -155,7 +155,7 @@ impl Texture {
     pub fn bind(&self, index: usize) {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + index as GLuint);
-            gl::Enable(gl::TEXTURE_2D);
+            //gl::Enable(gl::TEXTURE_2D);
             gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
     }

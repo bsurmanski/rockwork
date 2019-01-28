@@ -45,8 +45,9 @@ impl Context {
     pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context, time::Duration)) {
         let mut time = time::Instant::now();
         #[cfg(target_os = "emscripten")] {
+            let mut s = self;
             emscripten::set_main_loop_callback(|| { 
-                tick_fn(self, time.elapsed()); 
+                tick_fn(s, time.elapsed()); 
                 time = time::Instant::now();
             }, 0, true);
         }

@@ -4,6 +4,7 @@ use std::io::Read;
 use std::io::Error;
 use std::ffi::CString;
 use gl::types::*;
+use nalgebra::{Matrix2, Vector2, Vector4};
 
 use crate::shader::*;
 use crate::framebuffer::*;
@@ -111,11 +112,46 @@ impl Program {
         }
     }
 
-    pub fn bind_texture(&mut self, tex: &Texture, unit: i32, name: String) {
+    pub fn bind_texture(&mut self, name: &str, tex: &Texture, unit: i32) {
         unsafe {
+            self.bind();
             let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
-            gl::Uniform1i(loc, unit);
-            tex.bind(unit as usize);
+            if loc >= 0 {
+                gl::Uniform1i(loc, unit);
+                tex.bind(unit as usize);
+            }
+        }
+    }
+
+    pub fn set_uniform_mat2(&self, name: &str, u: &Matrix2<f32>) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::UniformMatrix2fv(loc, 1, gl::TRUE, u.as_slice().as_ptr());
+        }
+    }
+
+    pub fn set_uniform_vec2(&self, name: &str, u: &Vector2<f32>) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::Uniform2fv(loc, 1, u.as_slice().as_ptr());
+        }
+    }
+
+    pub fn set_uniform_vec4(&self, name: &str, u: &Vector4<f32>) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::Uniform4fv(loc, 1, u.as_slice().as_ptr());
+        }
+    }
+
+    pub fn set_uniform_float(&self, name: &str, u: f32) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::Uniform1f(loc, u);
         }
     }
 
