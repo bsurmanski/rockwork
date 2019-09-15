@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package rockwork.model;
+
+import "google/protobuf/any.proto";
+
+message Vec2 {
+    float x = 1;
+    float y = 2;
+}
+
+message Vec3 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message Vertex {
+    Vec3 position = 1;
+    Vec3 normal = 2;
+    Vec2 uv = 3;
+    google.protobuf.Any data = 4;
+}
+
+message Face {
+    repeated uint32 vertex_ids = 1;
+    google.protobuf.Any data = 2;
+}
+
+message HalfEdge {
+    uint32 vertex_id = 1;
+    uint32 next_face_id = 2;
+    uint32 next_edge_id = 3;
+    uint32 prev_edge_id = 4;
+}
+
+message Edge {
+    HalfEdge v1 = 1;
+    HalfEdge v2 = 2;
+    google.protobuf.Any data = 3;
+}

@@ -9,8 +9,11 @@ macro_rules! include_png_texture {
     ($x:literal) => {
         Texture::new_rgba_from_image(
             &mut image::load(
-            &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
-            image::ImageFormat::PNG).unwrap())
+                &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
+                image::ImageFormat::PNG,
+            )
+            .unwrap(),
+        )
     };
 }
 
@@ -19,8 +22,11 @@ macro_rules! include_tga_texture {
     ($x:literal) => {
         Texture::new_rgba_from_image(
             &mut image::load(
-            &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
-            image::ImageFormat::TGA).unwrap())
+                &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
+                image::ImageFormat::TGA,
+            )
+            .unwrap(),
+        )
     };
 }
 
@@ -33,7 +39,7 @@ impl FilteringMode {
     pub fn gl_enum(&self) -> GLuint {
         match self {
             FilteringMode::Linear => gl::LINEAR,
-            FilteringMode::Nearest => gl::NEAREST
+            FilteringMode::Nearest => gl::NEAREST,
         }
     }
 }
@@ -83,7 +89,7 @@ impl Texture {
         unsafe {
             let mut id: GLuint = 0;
             gl::GenTextures(1, &mut id);
-            let mut ret = Self { 
+            let mut ret = Self {
                 id,
                 width,
                 height,
@@ -104,17 +110,20 @@ impl Texture {
             let mut texture = Self::new(
                 rgba.width() as usize,
                 rgba.height() as usize,
-                TextureFormat::Rgba);
+                TextureFormat::Rgba,
+            );
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           gl::RGBA as i32,
-                           rgba.width() as i32,
-                           rgba.height() as i32,
-                           0,
-                           gl::RGBA,
-                           gl::UNSIGNED_BYTE,
-                           rgba.into_raw().as_ptr() as *const c_void);
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                gl::RGBA as i32,
+                rgba.width() as i32,
+                rgba.height() as i32,
+                0,
+                gl::RGBA,
+                gl::UNSIGNED_BYTE,
+                rgba.into_raw().as_ptr() as *const c_void,
+            );
             return texture;
         }
     }
@@ -123,15 +132,17 @@ impl Texture {
         unsafe {
             let mut texture = Self::new(w, h, TextureFormat::Rgba);
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           gl::RGBA8 as i32,
-                           w as i32,
-                           h as i32,
-                           0,
-                           gl::RGBA,
-                           gl::UNSIGNED_BYTE,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                gl::RGBA8 as i32,
+                w as i32,
+                h as i32,
+                0,
+                gl::RGBA,
+                gl::UNSIGNED_BYTE,
+                std::ptr::null(),
+            );
             return texture;
         }
     }
@@ -140,15 +151,17 @@ impl Texture {
         let texture = Self::new(w, h, TextureFormat::Depth);
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           gl::DEPTH_COMPONENT32 as i32, 
-                           w as i32, 
-                           h as i32, 
-                           0,
-                           gl::DEPTH_COMPONENT,
-                           gl::FLOAT,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                gl::DEPTH_COMPONENT32 as i32,
+                w as i32,
+                h as i32,
+                0,
+                gl::DEPTH_COMPONENT,
+                gl::FLOAT,
+                std::ptr::null(),
+            );
         }
         return texture;
     }
@@ -157,15 +170,17 @@ impl Texture {
         let texture = Self::new(w, h, TextureFormat::DepthStencil);
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           gl::DEPTH24_STENCIL8 as i32, 
-                           w as i32, 
-                           h as i32, 
-                           0,
-                           gl::DEPTH_STENCIL,
-                           gl::FLOAT,
-                           std::ptr::null());
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                gl::DEPTH24_STENCIL8 as i32,
+                w as i32,
+                h as i32,
+                0,
+                gl::DEPTH_STENCIL,
+                gl::FLOAT,
+                std::ptr::null(),
+            );
         }
         return texture;
     }
@@ -173,8 +188,16 @@ impl Texture {
     pub fn set_filtering_mode(&mut self, mode: FilteringMode) {
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
-            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, mode.gl_enum() as GLint);
-            gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, mode.gl_enum() as GLint);
+            gl::TexParameteri(
+                gl::TEXTURE_2D,
+                gl::TEXTURE_MIN_FILTER,
+                mode.gl_enum() as GLint,
+            );
+            gl::TexParameteri(
+                gl::TEXTURE_2D,
+                gl::TEXTURE_MAG_FILTER,
+                mode.gl_enum() as GLint,
+            );
         }
         self.filtering_mode = mode;
     }

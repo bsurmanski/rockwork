@@ -1,21 +1,24 @@
 extern crate gl;
 
-use std::{error, io, fmt};
-use std::ffi::CString;
 use gl::types::*;
 use nalgebra::{Matrix2, Vector2, Vector4};
+use std::ffi::CString;
+use std::{error, fmt, io};
 
-use crate::shader::*;
 use crate::framebuffer::*;
 use crate::mesh::*;
+use crate::shader::*;
 use crate::texture::*;
 
 #[macro_export]
 macro_rules! include_simple_program {
     ($name:expr, $vs:literal, $fs:literal) => {
-        Program::new_simple_program($name,
+        Program::new_simple_program(
+            $name,
             &mut std::io::Cursor::new(include_bytes!($vs).as_ref()),
-            &mut std::io::Cursor::new(include_bytes!($fs).as_ref())).unwrap()
+            &mut std::io::Cursor::new(include_bytes!($fs).as_ref()),
+        )
+        .unwrap()
     };
 }
 
@@ -64,7 +67,11 @@ impl Program {
         }
     }
 
-    pub fn new_simple_program(name: String, vs: &mut io::Read, fs: &mut io::Read) -> Result<Program, ProgramError> {
+    pub fn new_simple_program(
+        name: String,
+        vs: &mut io::Read,
+        fs: &mut io::Read,
+    ) -> Result<Program, ProgramError> {
         let mut p = Program::new(name);
         p.add_vertex_shader(vs)?;
         p.add_fragment_shader(fs)?;
@@ -73,19 +80,22 @@ impl Program {
     }
 
     pub fn add_vertex_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
-        let shader = Shader::new_with_source(ShaderStage::Vertex, src).map_err(|e| ProgramError::ReadError(e))?;
+        let shader = Shader::new_with_source(ShaderStage::Vertex, src)
+            .map_err(|e| ProgramError::ReadError(e))?;
         self.vertex_shader = Some(shader);
         Ok(())
     }
 
     pub fn add_geometry_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
-        let shader = Shader::new_with_source(ShaderStage::Geometry, src).map_err(|e| ProgramError::ReadError(e))?;
+        let shader = Shader::new_with_source(ShaderStage::Geometry, src)
+            .map_err(|e| ProgramError::ReadError(e))?;
         self.geometry_shader = Some(shader);
         Ok(())
     }
 
     pub fn add_fragment_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
-        let shader = Shader::new_with_source(ShaderStage::Fragment, src).map_err(|e| ProgramError::ReadError(e))?;
+        let shader = Shader::new_with_source(ShaderStage::Fragment, src)
+            .map_err(|e| ProgramError::ReadError(e))?;
         self.fragment_shader = Some(shader);
         Ok(())
     }
@@ -96,7 +106,12 @@ impl Program {
         gl::GetProgramiv(self.id, gl::LINK_STATUS, &mut err);
         gl::GetProgramiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
         let mut buffer: Vec<u8> = Vec::with_capacity(len as usize);
-        gl::GetProgramInfoLog(self.id, len, std::ptr::null_mut(), buffer.as_mut_ptr() as *mut i8);
+        gl::GetProgramInfoLog(
+            self.id,
+            len,
+            std::ptr::null_mut(),
+            buffer.as_mut_ptr() as *mut i8,
+        );
         buffer.set_len(len as usize);
         let err_str = String::from_utf8_unchecked(buffer);
         dbg!(&err_str);
@@ -110,7 +125,11 @@ impl Program {
 
     pub fn build(&mut self) -> Result<(), ProgramError> {
         unsafe {
-            let mut shaders = [&mut self.vertex_shader, &mut self.geometry_shader, &mut self.fragment_shader];
+            let mut shaders = [
+                &mut self.vertex_shader,
+                &mut self.geometry_shader,
+                &mut self.fragment_shader,
+            ];
             for s in shaders.iter_mut() {
                 if let Some(shader) = s {
                     shader.compile().map_err(|e| ProgramError::BuildError(e));
@@ -126,7 +145,11 @@ impl Program {
             gl::LinkProgram(self.id);
             self.get_link_error()?;
 
-            let mut shaders = [&mut self.vertex_shader, &mut self.geometry_shader, &mut self.fragment_shader];
+            let mut shaders = [
+                &mut self.vertex_shader,
+                &mut self.geometry_shader,
+                &mut self.fragment_shader,
+            ];
             for s in shaders.iter_mut() {
                 if let Some(shader) = s {
                     gl::DetachShader(self.id, shader.id);

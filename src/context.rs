@@ -1,7 +1,7 @@
-use sdl2::Sdl;
 use crate::window::Window;
-use std::time;
+use sdl2::Sdl;
 use std::cell::RefCell;
+use std::time;
 
 pub struct Context<T> {
     sdl: Sdl,
@@ -18,7 +18,7 @@ impl<T> Context<T> {
         let sdl_video = sdl_context.video().unwrap();
         let sdl_event_pump = sdl_context.event_pump().unwrap();
         Self {
-            sdl: sdl_context, 
+            sdl: sdl_context,
             sdl_video: sdl_video,
             sdl_event_pump: sdl_event_pump,
             window: None,
@@ -55,12 +55,17 @@ impl<T> Context<T> {
 
     pub fn run(&mut self, tick_fn: &mut FnMut(&mut Context<T>, time::Duration)) {
         let mut time = time::Instant::now();
-        #[cfg(target_os = "emscripten")] {
+        #[cfg(target_os = "emscripten")]
+        {
             let mut s = self;
-            emscripten::set_main_loop_callback(|| { 
-                tick_fn(s, time.elapsed()); 
-                time = time::Instant::now();
-            }, 0, true);
+            emscripten::set_main_loop_callback(
+                || {
+                    tick_fn(s, time.elapsed());
+                    time = time::Instant::now();
+                },
+                0,
+                true,
+            );
         }
 
         #[cfg(not(target_os = "emscripten"))]
@@ -73,18 +78,17 @@ impl<T> Context<T> {
 
             time = time::Instant::now();
             // should be roughly 60 fps
-            std::thread::sleep(time::Duration::new(0, 1_000_000_000u32 / 60)
-                               );//- start.elapsed());
+            std::thread::sleep(time::Duration::new(0, 1_000_000_000u32 / 60)); //- start.elapsed());
         }
     }
 
     pub fn quit(&mut self) {
-        #[cfg(target_os = "emscripten")] {
+        #[cfg(target_os = "emscripten")]
+        {
             // TODO: exit emscripten loop
         }
         self.running = false;
     }
 
-    pub fn register_event_callback() {
-    }
+    pub fn register_event_callback() {}
 }

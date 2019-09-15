@@ -1,9 +1,9 @@
 extern crate gl;
 
-use std::io::Read;
-use std::io::Error;
-use std::ffi::CString;
 use gl::types::*;
+use std::ffi::CString;
+use std::io::Error;
+use std::io::Read;
 
 #[derive(Copy, Clone, Debug)]
 pub enum ShaderStage {
@@ -59,7 +59,12 @@ impl Shader {
         gl::GetShaderiv(self.id, gl::INFO_LOG_LENGTH, &mut len);
         if len > 0 {
             let mut buffer: Vec<u8> = Vec::with_capacity(len as usize);
-            gl::GetShaderInfoLog(self.id, len, std::ptr::null_mut(), buffer.as_mut_ptr() as *mut i8);
+            gl::GetShaderInfoLog(
+                self.id,
+                len,
+                std::ptr::null_mut(),
+                buffer.as_mut_ptr() as *mut i8,
+            );
             buffer.set_len(len as usize);
             let err_str = String::from_utf8_unchecked(buffer);
             dbg!(&err_str);

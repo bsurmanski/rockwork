@@ -1,7 +1,7 @@
 use gl::types::*;
 use std::ffi::c_void;
-use std::io::Read;
 use std::io::Cursor;
+use std::io::Read;
 
 #[macro_export]
 macro_rules! include_mdl {
@@ -68,19 +68,22 @@ impl Drop for Mesh {
 
 fn read_into<T>(f: &mut Read, s: &mut T) -> std::io::Result<()> {
     unsafe {
-        let slice = std::slice::from_raw_parts_mut(
-            (s as *mut T) as *mut u8,
-            std::mem::size_of::<T>());
+        let slice =
+            std::slice::from_raw_parts_mut((s as *mut T) as *mut u8, std::mem::size_of::<T>());
         f.read_exact(slice)?;
         Ok(())
     }
 }
 
-fn read_into_slice<T>(f: &mut Read, s: &mut [T]) -> std::io::Result<()> where T: std::fmt::Debug{
+fn read_into_slice<T>(f: &mut Read, s: &mut [T]) -> std::io::Result<()>
+where
+    T: std::fmt::Debug,
+{
     unsafe {
         let slice = std::slice::from_raw_parts_mut(
             (s.as_ptr() as *mut T) as *mut u8,
-            std::mem::size_of::<T>() * s.len());
+            std::mem::size_of::<T>() * s.len(),
+        );
         f.read_exact(slice)?;
         Ok(())
     }
@@ -110,7 +113,10 @@ impl Mesh {
         read_into(f, &mut header).unwrap();
 
         if String::from_utf8_lossy(&header.magic[0..3]) != "MDL" {
-            return Err(format!("Bad header in .mdl file: {:?}", String::from_utf8_lossy(&header.magic[0..2])));
+            return Err(format!(
+                "Bad header in .mdl file: {:?}",
+                String::from_utf8_lossy(&header.magic[0..2])
+            ));
         }
 
         let mut verts: Vec<Vertex> = Vec::with_capacity(header.nverts as usize);
@@ -133,10 +139,12 @@ impl Mesh {
             gl::BindVertexArray(self.vao);
 
             gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
-            gl::BufferData(gl::ARRAY_BUFFER, 
-                           (std::mem::size_of::<Vertex>() * verts.len()) as GLsizeiptr,
-                           verts.as_ptr() as *const GLvoid,
-                           gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (std::mem::size_of::<Vertex>() * verts.len()) as GLsizeiptr,
+                verts.as_ptr() as *const GLvoid,
+                gl::STATIC_DRAW,
+            );
 
             // pos
             gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 32, std::ptr::null());
@@ -153,17 +161,18 @@ impl Mesh {
 
             gl::BindVertexArray(0);
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-
         }
     }
 
     pub fn upload_face_data(&mut self, faces: Vec<Face>) {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ibo);
-            gl::BufferData(gl::ELEMENT_ARRAY_BUFFER, 
-                           (std::mem::size_of::<Face>() * faces.len()) as GLsizeiptr,
-                           faces.as_ptr() as *const GLvoid,
-                           gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ELEMENT_ARRAY_BUFFER,
+                (std::mem::size_of::<Face>() * faces.len()) as GLsizeiptr,
+                faces.as_ptr() as *const GLvoid,
+                gl::STATIC_DRAW,
+            );
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
             self.nelems = faces.len() * 3;
         }
@@ -179,8 +188,12 @@ impl Mesh {
 
     pub fn draw(&self) {
         unsafe {
-            gl::DrawElements(gl::TRIANGLES, self.nelems as i32, 
-                             gl::UNSIGNED_SHORT, std::ptr::null());
+            gl::DrawElements(
+                gl::TRIANGLES,
+                self.nelems as i32,
+                gl::UNSIGNED_SHORT,
+                std::ptr::null(),
+            );
         }
     }
 }
