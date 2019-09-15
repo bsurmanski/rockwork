@@ -1,6 +1,14 @@
 use gl::types::*;
 use std::ffi::c_void;
 use std::io::Read;
+use std::io::Cursor;
+
+#[macro_export]
+macro_rules! include_mdl {
+    ($x:literal) => {
+        Mesh::from_mdl(&mut std::io::Cursor::new(include_bytes!($x).as_ref())).unwrap()
+    };
+}
 
 #[derive(Default, Debug)]
 #[repr(C)]
