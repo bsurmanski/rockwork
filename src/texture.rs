@@ -4,6 +4,26 @@ extern crate image;
 use gl::types::*;
 use std::ffi::*;
 
+#[macro_export]
+macro_rules! include_png_texture {
+    ($x:literal) => {
+        Texture::new_rgba_from_image(
+            &mut image::load(
+            &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
+            image::ImageFormat::PNG).unwrap())
+    };
+}
+
+#[macro_export]
+macro_rules! include_tga_texture {
+    ($x:literal) => {
+        Texture::new_rgba_from_image(
+            &mut image::load(
+            &mut std::io::Cursor::new(include_bytes!($x).as_ref()),
+            image::ImageFormat::TGA).unwrap())
+    };
+}
+
 pub enum FilteringMode {
     Linear,
     Nearest,
@@ -25,9 +45,10 @@ pub enum WrapMode {
 }
 
 pub enum TextureFormat {
-    RGBA,
-    DEPTH,
-    DEPTH_STENCIL,
+    Invalid,
+    Rgba,
+    Depth,
+    DepthStencil,
 }
 
 impl WrapMode {
@@ -44,6 +65,9 @@ pub struct Texture {
     pub id: GLuint,
     pub width: usize,
     pub height: usize,
+    pub filtering_mode: FilteringMode,
+    pub wrap_mode: WrapMode,
+    pub format: TextureFormat,
 }
 
 impl Drop for Texture {
@@ -55,11 +79,18 @@ impl Drop for Texture {
 }
 
 impl Texture {
-    fn new(w: usize, h: usize) -> Self {
+    fn new(width: usize, height: usize, format: TextureFormat) -> Self {
         unsafe {
             let mut id: GLuint = 0;
             gl::GenTextures(1, &mut id);
-            let mut ret = Self { id: id, width: w, height: h };
+            let mut ret = Self { 
+                id,
+                width,
+                height,
+                format,
+                wrap_mode: WrapMode::Clamp,
+                filtering_mode: FilteringMode::Nearest,
+            };
             ret.set_filtering_mode(FilteringMode::Nearest);
             ret.set_wrap_mode(WrapMode::Repeat);
             return ret;
@@ -70,7 +101,10 @@ impl Texture {
         unsafe {
             // flipping vertical because GL is indexed from the bottom.
             let rgba = image::imageops::flip_vertical(&img.to_rgba());
-            let mut texture = Self::new(rgba.width() as usize, rgba.height() as usize);
+            let mut texture = Self::new(
+                rgba.width() as usize,
+                rgba.height() as usize,
+                TextureFormat::Rgba);
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
                            0,
@@ -87,7 +121,7 @@ impl Texture {
 
     pub fn new_rgba(w: usize, h: usize) -> Self {
         unsafe {
-            let mut texture = Self::new(w, h);
+            let mut texture = Self::new(w, h, TextureFormat::Rgba);
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
                            0,
@@ -103,7 +137,7 @@ impl Texture {
     }
 
     pub fn new_depth(w: usize, h: usize) -> Self {
-        let texture = Self::new(w, h);
+        let texture = Self::new(w, h, TextureFormat::Depth);
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
@@ -120,7 +154,7 @@ impl Texture {
     }
 
     pub fn new_depth_stencil(w: usize, h: usize) -> Self {
-        let texture = Self::new(w, h);
+        let texture = Self::new(w, h, TextureFormat::DepthStencil);
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::TexImage2D(gl::TEXTURE_2D,
@@ -142,6 +176,7 @@ impl Texture {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, mode.gl_enum() as GLint);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, mode.gl_enum() as GLint);
         }
+        self.filtering_mode = mode;
     }
 
     pub fn set_wrap_mode(&mut self, mode: WrapMode) {
@@ -150,6 +185,7 @@ impl Texture {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, mode.gl_enum() as GLint);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, mode.gl_enum() as GLint);
         }
+        self.wrap_mode = mode;
     }
 
     pub fn bind(&self, index: usize) {
