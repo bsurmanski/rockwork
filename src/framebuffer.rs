@@ -1,7 +1,7 @@
 extern crate gl;
 
 use gl::types::*;
-use crate::texture::Texture;
+use crate::texture::*;
 
 static TARGETS: [GLuint; 10] = [
     gl::COLOR_ATTACHMENT0,
@@ -59,10 +59,24 @@ impl Framebuffer {
         // TODO: support depth / stencil
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER,
-                                     gl::COLOR_ATTACHMENT0 + self.bindings.len() as GLuint,
-                                     gl::TEXTURE_2D,
-                                     texture.id, 0);
+            match texture.format {
+                TextureFormat::Rgba => {
+                gl::FramebufferTexture2D(
+                    gl::FRAMEBUFFER,
+                    gl::COLOR_ATTACHMENT0 + self.bindings.len() as GLuint,
+                    gl::TEXTURE_2D,
+                    texture.id, 0);
+                }
+
+                TextureFormat::Depth => {
+                gl::FramebufferTexture2D(
+                    gl::FRAMEBUFFER,
+                    gl::DEPTH_ATTACHMENT,
+                    gl::TEXTURE_2D,
+                    texture.id, 0);
+                }
+                _ => { panic!("unhandled texture format added to framebuffer"); }
+            }
         }
         self.bindings.push(Binding { target: texture.id });
     }
