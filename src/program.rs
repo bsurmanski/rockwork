@@ -1,7 +1,6 @@
 extern crate gl;
 
-use std::io::Read;
-use std::io::Error;
+use std::{error, io, fmt};
 use std::ffi::CString;
 use gl::types::*;
 use nalgebra::{Matrix2, Vector2, Vector4};
@@ -10,6 +9,30 @@ use crate::shader::*;
 use crate::framebuffer::*;
 use crate::mesh::*;
 use crate::texture::*;
+
+#[macro_export]
+macro_rules! include_simple_program {
+    ($name:expr, $vs:literal, $fs:literal) => {
+        Program::new_simple_program($name,
+            &mut std::io::Cursor::new(include_bytes!($vs).as_ref()),
+            &mut std::io::Cursor::new(include_bytes!($fs).as_ref())).unwrap()
+    };
+}
+
+#[derive(Debug)]
+pub enum ProgramError {
+    ReadError(io::Error),
+    BuildError(String),
+    LinkError(String),
+}
+
+impl fmt::Display for ProgramError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Program Error")
+    }
+}
+
+impl error::Error for ProgramError {}
 
 pub struct Program {
     pub id: GLuint,
@@ -41,25 +64,33 @@ impl Program {
         }
     }
 
-    pub fn add_vertex_shader(&mut self, src: &mut Read) -> Result<(), Error> {
-        let shader = Shader::new_with_source(ShaderStage::Vertex, src)?;
+    pub fn new_simple_program(name: String, vs: &mut io::Read, fs: &mut io::Read) -> Result<Program, ProgramError> {
+        let mut p = Program::new(name);
+        p.add_vertex_shader(vs)?;
+        p.add_fragment_shader(fs)?;
+        p.build()?;
+        return Ok(p);
+    }
+
+    pub fn add_vertex_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
+        let shader = Shader::new_with_source(ShaderStage::Vertex, src).map_err(|e| ProgramError::ReadError(e))?;
         self.vertex_shader = Some(shader);
         Ok(())
     }
 
-    pub fn add_geometry_shader(&mut self, src: &mut Read) -> Result<(), Error> {
-        let shader = Shader::new_with_source(ShaderStage::Geometry, src)?;
+    pub fn add_geometry_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
+        let shader = Shader::new_with_source(ShaderStage::Geometry, src).map_err(|e| ProgramError::ReadError(e))?;
         self.geometry_shader = Some(shader);
         Ok(())
     }
 
-    pub fn add_fragment_shader(&mut self, src: &mut Read) -> Result<(), Error> {
-        let shader = Shader::new_with_source(ShaderStage::Fragment, src)?;
+    pub fn add_fragment_shader(&mut self, src: &mut io::Read) -> Result<(), ProgramError> {
+        let shader = Shader::new_with_source(ShaderStage::Fragment, src).map_err(|e| ProgramError::ReadError(e))?;
         self.fragment_shader = Some(shader);
         Ok(())
     }
 
-    unsafe fn get_link_error(&self) -> Result<(), String> {
+    unsafe fn get_link_error(&self) -> Result<(), ProgramError> {
         let mut err: GLint = -1;
         let mut len = 0;
         gl::GetProgramiv(self.id, gl::LINK_STATUS, &mut err);
@@ -70,19 +101,19 @@ impl Program {
         let err_str = String::from_utf8_unchecked(buffer);
         dbg!(&err_str);
         if err == gl::FALSE as GLint {
-            return Err(err_str);
+            return Err(ProgramError::BuildError(err_str.to_string()));
         } else {
             dbg!(err_str);
         }
         return Ok(());
     }
 
-    pub fn build(&mut self) -> Result<(), String> {
+    pub fn build(&mut self) -> Result<(), ProgramError> {
         unsafe {
             let mut shaders = [&mut self.vertex_shader, &mut self.geometry_shader, &mut self.fragment_shader];
             for s in shaders.iter_mut() {
                 if let Some(shader) = s {
-                    shader.compile()?;
+                    shader.compile().map_err(|e| ProgramError::BuildError(e));
                     gl::AttachShader(self.id, shader.id);
                 }
             }
