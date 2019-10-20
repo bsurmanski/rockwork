@@ -1,5 +1,6 @@
 use sdl2::video::GLProfile;
 use std::ffi::CStr;
+use crate::framebuffer::Framebuffer;
 
 pub struct Window {
     gl_context: sdl2::video::GLContext,
@@ -53,13 +54,23 @@ impl Window {
     }
 
     pub fn clear(&self) {
+        Framebuffer::unbind();
         unsafe {
             gl::ClearColor(0.39, 0.58, 0.92, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+        }
+    }
+
+    pub fn clear_with_color(&self, r: f32, g: f32, b: f32) {
+        Framebuffer::unbind();
+        unsafe {
+            gl::ClearColor(r, g, b, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
     }
 
     pub fn swap_buffers(&self) {
+        Framebuffer::unbind();
         self.sdl_window.gl_swap_window();
     }
 }

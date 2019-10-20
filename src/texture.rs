@@ -30,6 +30,7 @@ macro_rules! include_tga_texture {
     };
 }
 
+#[derive(Copy, Clone)]
 pub enum FilteringMode {
     Linear,
     Nearest,
@@ -44,12 +45,14 @@ impl FilteringMode {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum WrapMode {
     Clamp,
     Mirrored,
     Repeat,
 }
 
+#[derive(Copy, Clone)]
 pub enum TextureFormat {
     Invalid,
     Rgba,
@@ -68,12 +71,12 @@ impl WrapMode {
 }
 
 pub struct Texture {
-    pub id: GLuint,
-    pub width: usize,
-    pub height: usize,
-    pub filtering_mode: FilteringMode,
-    pub wrap_mode: WrapMode,
-    pub format: TextureFormat,
+    id: GLuint,
+    width: usize,
+    height: usize,
+    filtering_mode: FilteringMode,
+    wrap_mode: WrapMode,
+    format: TextureFormat,
 }
 
 impl Drop for Texture {
@@ -85,7 +88,7 @@ impl Drop for Texture {
 }
 
 impl Texture {
-    fn new(width: usize, height: usize, format: TextureFormat) -> Self {
+    pub fn new(width: usize, height: usize, format: TextureFormat) -> Self {
         unsafe {
             let mut id: GLuint = 0;
             gl::GenTextures(1, &mut id);
@@ -183,6 +186,30 @@ impl Texture {
             );
         }
         return texture;
+    }
+
+    pub fn id(&self) -> GLuint {
+        self.id
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn filtering_mode(&self) -> FilteringMode {
+        self.filtering_mode
+    }
+
+    pub fn wrap_mode(&self) -> WrapMode {
+        self.wrap_mode
+    }
+
+    pub fn format(&self) -> TextureFormat {
+        self.format
     }
 
     pub fn set_filtering_mode(&mut self, mode: FilteringMode) {

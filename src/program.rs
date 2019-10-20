@@ -1,7 +1,7 @@
 extern crate gl;
 
 use gl::types::*;
-use nalgebra::{Matrix2, Vector2, Vector4};
+use nalgebra::{Matrix2, Matrix4, Vector2, Vector4};
 use std::ffi::CString;
 use std::{error, fmt, io};
 
@@ -38,7 +38,7 @@ impl fmt::Display for ProgramError {
 impl error::Error for ProgramError {}
 
 pub struct Program {
-    pub id: GLuint,
+    id: GLuint,
     name: String,
     vertex_shader: Option<Shader>,
     geometry_shader: Option<Shader>,
@@ -160,13 +160,17 @@ impl Program {
         }
     }
 
+    pub fn id(&self) -> GLuint {
+        self.id
+    }
+
     pub fn bind(&self) {
         unsafe {
             gl::UseProgram(self.id);
         }
     }
 
-    pub fn bind_texture(&mut self, name: &str, tex: &Texture, unit: i32) {
+    pub fn bind_texture(&self, name: &str, tex: &Texture, unit: i32) {
         unsafe {
             self.bind();
             let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
@@ -181,7 +185,15 @@ impl Program {
         unsafe {
             self.bind();
             let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
-            gl::UniformMatrix2fv(loc, 1, gl::TRUE, u.as_slice().as_ptr());
+            gl::UniformMatrix2fv(loc, 1, gl::FALSE, u.as_slice().as_ptr());
+        }
+    }
+
+    pub fn set_uniform_mat4(&self, name: &str, u: &Matrix4<f32>) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::UniformMatrix4fv(loc, 1, gl::FALSE, u.as_slice().as_ptr());
         }
     }
 
@@ -206,6 +218,22 @@ impl Program {
             self.bind();
             let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
             gl::Uniform1f(loc, u);
+        }
+    }
+
+    pub fn set_uniform_bool(&self, name: &str, u: bool) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::Uniform1i(loc, u as GLint);
+        }
+    }
+
+    pub fn set_uniform_int(&self, name: &str, u: i32) {
+        unsafe {
+            self.bind();
+            let loc = gl::GetUniformLocation(self.id, CString::new(name).unwrap().as_ptr());
+            gl::Uniform1i(loc, u);
         }
     }
 
