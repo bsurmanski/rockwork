@@ -79,7 +79,6 @@ impl<T> Context<T> {
 
         #[cfg(not(target_os = "emscripten"))]
         'run: loop {
-            dbg!(time.elapsed());
             tick_fn(self, time::Duration::from_millis(32));
 
             if !self.running {
